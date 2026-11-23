@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="#101722">
-    <title>Техничка база на знаење</title>
+    <title>Архива за поврзување</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
 
@@ -55,14 +55,15 @@
             justify-content: space-between;
             align-items: center;
             gap: 16px;
-            margin-bottom: 48px
+            margin-bottom: 40px
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 11px;
-            font-weight: 700
+            gap: 13px;
+            font-weight: 700;
+            flex: 0 0 auto
         }
 
         .brand-home {
@@ -74,65 +75,17 @@
             cursor: pointer
         }
 
-        .welcome-badge {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            border: 1px solid #426352;
-            border-radius: 13px;
-            background: linear-gradient(125deg, #203a31, #192b36);
-            box-shadow: 0 8px 22px #0004;
-            margin: 0 2px 0 auto;
-            white-space: nowrap
-        }
-
-        .welcome-icon {
+        .brand-copy {
             display: grid;
-            place-items: center;
-            width: 38px;
-            height: 38px;
-            flex: 0 0 38px;
-            border: 1px solid #d5fbe5;
-            border-radius: 12px;
-            background: linear-gradient(145deg, #c2f5d9, #8bd6b2);
-            color: #163126;
-            box-shadow: 0 4px 13px #a8edcd44, inset 0 1px #ffffff99
+            gap: 0
         }
 
-        .welcome-icon svg {
-            width: 25px;
-            height: 25px;
-            overflow: visible
-        }
-
-        .welcome-icon .shield {
-            fill: none;
-            stroke: #163126;
-            stroke-width: 1.7;
-            stroke-linejoin: round
-        }
-
-        .welcome-icon .bolt {
-            fill: #163126
-        }
-
-        .welcome-badge div {
-            display: grid;
-            gap: 3px
-        }
-
-        .welcome-caption {
-            color: #9db6aa;
-            font-size: 8px;
-            letter-spacing: 1.1px;
-            font-weight: 700
-        }
-
-        .welcome-badge strong {
-            color: #f0f6f2;
-            font: 700 13px Manrope, "DM Sans", Arial, sans-serif;
-            letter-spacing: .15px
+        .brand-name {
+            white-space: nowrap;
+            color: var(--accent);
+            font: 900 clamp(21px, 2.7vw, 30px)/1 Manrope, sans-serif;
+            letter-spacing: -.55px;
+            text-shadow: 0 3px 20px #a8edcd22
         }
 
         .mark {
@@ -147,23 +100,73 @@
         .top-actions {
             display: flex;
             align-items: center;
-            gap: 8px
+            justify-content: flex-end;
+            gap: 12px;
+            min-width: 0
         }
 
-        .save-status,
-        .login-user {
+        .save-status {
             color: var(--muted);
-            font-size: 12px
+            font-size: 10px;
+            white-space: nowrap
+        }
+
+        .account-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            padding: 7px 8px 7px 10px;
+            border: 1px solid #2c3b4d;
+            border-radius: 12px;
+            background: #152130cc
+        }
+
+        .account-dot {
+            width: 9px;
+            height: 9px;
+            flex: 0 0 9px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 12px #a8edcd66
+        }
+
+        .account-meta {
+            display: grid;
+            gap: 2px;
+            min-width: 0
+        }
+
+        .account-label {
+            color: #8292a7;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: .8px
+        }
+
+        .account-welcome {
+            color: #f0f6f2;
+            font: 700 11px Manrope, "DM Sans", Arial, sans-serif
+        }
+
+        .login-user {
+            max-width: 190px;
+            overflow: hidden;
+            color: #e1eaf3;
+            font-size: 11px;
+            text-overflow: ellipsis;
+            white-space: nowrap
         }
 
         .logout,
         .subtle-btn {
-            padding: 7px 10px;
+            padding: 7px 9px;
             border: 1px solid #344256;
             border-radius: 8px;
-            background: #182535;
+            background: #1a2939;
             color: #c4ceda;
-            font-size: 11px
+            font-size: 10px;
+            white-space: nowrap
         }
 
         .intro {
@@ -193,22 +196,16 @@
 
         .eyebrow {
             color: var(--accent);
-            font-size: 11px;
-            letter-spacing: 2px;
+            font-size: 10px;
+            letter-spacing: 1.8px;
             text-transform: uppercase;
             font-weight: 700
         }
 
         .intro h1 {
-            font: 800 clamp(32px, 5vw, 48px)/1.08 Manrope, sans-serif;
-            letter-spacing: -1.4px;
-            margin: 10px 0
-        }
-
-        .intro p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 14px
+            font: 800 clamp(34px, 5vw, 50px)/1.04 Manrope, sans-serif;
+            letter-spacing: -1.8px;
+            margin: 11px 0 9px
         }
 
         .toolbar {
@@ -293,7 +290,9 @@
 
         .folders {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-auto-rows: 1fr;
+            align-items: stretch;
             gap: 12px;
             width: 100%;
             max-width: 1040px
@@ -304,7 +303,7 @@
             display: grid;
             grid-template-columns: 96px minmax(0, 1fr);
             gap: 10px;
-            min-height: 130px;
+            min-height: 118px;
             padding: 10px;
             background: #172231;
             border: 1px solid var(--line);
@@ -340,15 +339,15 @@
         }
 
         .folder-desc {
-            margin-top: 6px;
+            margin-top: 4px;
             color: #95a4b7;
-            font-size: 10px;
-            line-height: 1.4;
+            font-size: 9px;
+            line-height: 1.35;
             overflow-wrap: anywhere
         }
 
         .folder-count {
-            margin-top: 7px;
+            margin-top: 5px;
             color: #8292a7;
             font-size: 9px
         }
@@ -372,20 +371,20 @@
 
         .tiny-tool.folder-edit {
             position: absolute;
-            right: 10px;
-            top: 10px;
-            width: 29px;
-            height: 27px;
-            font-size: 14px
+            right: 8px;
+            bottom: 8px;
+            width: 24px;
+            height: 22px;
+            font-size: 12px
         }
 
         .tiny-tool.folder-reorder {
             position: absolute;
-            left: 50%;
+            right: 36px;
             bottom: 8px;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 28px;
+            width: 24px;
+            height: 22px;
+            transform: none;
             border-color: #a8edcd;
             background: #a8edcd;
             color: #10231b;
@@ -959,6 +958,12 @@
             font-size: 10px
         }
 
+        @media(max-width:900px) {
+            .folders {
+                grid-template-columns: repeat(2, minmax(0, 1fr))
+            }
+        }
+
         @media(max-width:700px) {
             .shell {
                 padding: 20px 13px 40px
@@ -966,20 +971,23 @@
 
             .topbar {
                 flex-wrap: wrap;
-                gap: 14px;
-                margin-bottom: 32px
-            }
-
-            .welcome-badge {
-                order: 3;
-                flex: 0 1 auto;
-                max-width: 100%;
-                margin: 0 0 0 auto;
-                align-self: flex-end
+                gap: 12px;
+                margin-bottom: 34px
             }
 
             .top-actions {
-                margin-left: auto
+                width: 100%;
+                margin-left: 0;
+                justify-content: space-between
+            }
+
+            .brand-name {
+                font-size: 22px
+            }
+
+            .account-chip {
+                flex: 1;
+                justify-content: space-between
             }
 
             .intro {
@@ -1002,13 +1010,13 @@
             }
 
             .folders {
-                grid-template-columns: repeat(auto-fit, minmax(230px, 1fr))
+                grid-template-columns: repeat(2, minmax(0, 1fr))
             }
 
             .folder {
                 grid-template-columns: 96px minmax(0, 1fr);
                 gap: 10px;
-                min-height: 126px
+                min-height: 118px
             }
 
             .folder-photo {
@@ -1030,6 +1038,14 @@
         }
 
         @media(max-width:440px) {
+            .brand-name {
+                font-size: 19px
+            }
+
+            .folders {
+                grid-template-columns: 1fr
+            }
+
             .form-grid {
                 grid-template-columns: 1fr
             }
@@ -1059,24 +1075,25 @@
 
 <body>
     <main class="shell">
-        <header class="topbar"><button class="brand brand-home" id="brand-home" type="button"
-                aria-label="Почетна страница"><img class="mark" src="assets/logo.jfif" alt="Aleks Sistemi"><span
-                    data-cyr>Техничка база на знаење</span></button>
-            <div class="welcome-badge"><span class="welcome-icon" aria-hidden="true"><svg viewBox="0 0 32 32">
-                        <path class="shield" d="M16 3 27 7v8c0 6.7-4.5 11.3-11 14C9.5 26.3 5 21.7 5 15V7l11-4Z" />
-                        <path class="bolt" d="m18.4 7.5-8 10h5.8l-2 7 8-10h-5.8l2-7Z" />
-                    </svg></span>
-                <div><span class="welcome-caption">АДМИНИСТРАТОРСКИ ПРИСТАП</span><strong>Добредојдовте, Ѓоко</strong>
+        <header class="topbar">
+            <button class="brand brand-home" id="brand-home" type="button" aria-label="Почетна страница">
+                <img class="mark" src="assets/logo.jfif" alt="Архива за поврзување">
+                <span class="brand-copy"><strong class="brand-name" data-cyr>АРХИВА ЗА ПОВРЗУВАЊЕ</strong></span>
+            </button>
+            <div class="top-actions">
+                <span class="save-status" id="save-status"></span>
+                <div class="account-chip"><span class="account-dot" aria-hidden="true"></span>
+                    <div class="account-meta">
+                        <span class="account-label" data-cyr>АДМИНИСТРАТОРСКИ ПАНЕЛ</span>
+                        <strong class="account-welcome" data-cyr>Добредојдовте, Ѓоко</strong>
+                        <span class="login-user hidden" id="login-user"></span>
+                    </div>
+                    <button class="logout hidden" id="logout" type="button" data-cyr>Одјави се</button>
                 </div>
             </div>
-            <div class="top-actions"><span class="save-status" id="save-status"></span><span class="login-user hidden"
-                    id="login-user"></span><button class="logout hidden" id="logout" type="button" data-cyr>Одјави
-                    се</button></div>
         </header>
         <section class="intro">
-            <div class="intro-copy"><span class="eyebrow" data-cyr>Технички белешки</span>
-                <h1 data-cyr>Техничка база на знаење</h1>
-                <p data-cyr>Знаете го името или моделот? Внесете го во пребарувањето и брзо пронајдете го записот.</p>
+            <div class="intro-copy"><span class="eyebrow" data-cyr>ПРОВЕРЕНО ЗНАЕЊЕ · БРЗО РЕШЕНИЕ</span>
             </div>
             <div class="intro-actions"><button class="add" id="add-entry" type="button" data-cyr>+ Нов
                     запис</button><button class="add" id="add-folder" type="button" data-cyr>+ Нова главна
@@ -1084,7 +1101,7 @@
         </section>
         <div class="toolbar">
             <div class="search"><span class="search-mark">⌕</span><input id="search" type="search" autocomplete="off"
-                    placeholder="Пребарај по модел или поврзување">
+                    placeholder="Пребарај по модел, уред или постапка">
                 <div class="suggestions hidden" id="suggestions"></div>
             </div>
         </div>
@@ -1100,7 +1117,7 @@
             </div>
             <div class="entries" id="entries"></div>
         </section>
-        <p class="footer" data-cyr>Податоците се зачувуваат локално и се синхронизираат со Firebase кога си најавен.</p>
+        <p class="footer" data-cyr>Податоците се чуваат во базата на податоци, со пристап заштитен преку твојата сметка.</p>
     </main>
     <aside class="backup-dock"><button class="subtle-btn" id="backup-toggle" type="button" data-cyr>Резервни
             копии</button>
@@ -1211,7 +1228,7 @@
         function toCyr(v = '') { v = String(v).replace(/\bzolta\b/gi, 'жолта').replace(/\bzicaite\b/gi, 'жиците').replace(/\bzicite\b/gi, 'жиците').replace(/\bzici\b/gi, 'жици').replace(/\bzica\b/gi, 'жица').replace(/\bcitac\b/gi, 'читач'); return String(v).replace(/[A-Za-z0-9]+/g, t => { if (/[0-9]/.test(t) || protect.has(t.toLowerCase()) || /^[A-Z]+$/.test(t)) return t; const x = t.toLowerCase(), pairs = [['sht', 'шт'], ['dzh', 'џ'], ['zh', 'ж'], ['ch', 'ч'], ['sh', 'ш'], ['lj', 'љ'], ['nj', 'њ'], ['gj', 'ѓ'], ['kj', 'ќ'], ['dj', 'ђ'], ['dz', 'ѕ']], one = { a: 'а', b: 'б', v: 'в', g: 'г', d: 'д', e: 'е', z: 'з', i: 'и', j: 'ј', k: 'к', l: 'л', m: 'м', n: 'н', o: 'о', p: 'п', r: 'р', s: 'с', t: 'т', u: 'у', f: 'ф', h: 'х', c: 'ц' }; let out = ''; for (let i = 0; i < x.length;) { const p = pairs.find(y => x.startsWith(y[0], i)); if (p) { out += p[1]; i += p[0].length } else { out += one[x[i]] || x[i]; i++ } } return t[0] === t[0].toUpperCase() ? out[0].toUpperCase() + out.slice(1) : out }) }
         function fromCyr(v = '') { const m = { а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', ѓ: 'gj', е: 'e', ж: 'zh', з: 'z', ѕ: 'dz', и: 'i', ј: 'j', к: 'k', л: 'l', љ: 'lj', м: 'm', н: 'n', њ: 'nj', о: 'o', п: 'p', р: 'r', с: 's', т: 't', ќ: 'kj', у: 'u', ф: 'f', х: 'h', ц: 'c', ч: 'ch', џ: 'dzh', ш: 'sh', ђ: 'dj' }; return Array.from(String(v).toLowerCase(), c => m[c] || c).join('').replace(/dzh/g, 'dz').replace(/zh/g, 'z').replace(/ch/g, 'c').replace(/sh/g, 's').replace(/gj/g, 'g').replace(/kj/g, 'k') }
         const $ = s => document.querySelector(s), esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-        document.title = 'Техничка база на знаење'; function translateStatic() { const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while (n = w.nextNode()) { if (!['SCRIPT', 'STYLE'].includes(n.parentElement?.tagName) && n.nodeValue.trim()) n.nodeValue = toCyr(n.nodeValue) } document.querySelectorAll('[placeholder],[title],[aria-label]').forEach(x => { for (const a of ['placeholder', 'title', 'aria-label']) if (x.hasAttribute(a)) x.setAttribute(a, toCyr(x.getAttribute(a))) }) } translateStatic();
+        document.title = 'Архива за поврзување'; function translateStatic() { const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while (n = w.nextNode()) { if (!['SCRIPT', 'STYLE'].includes(n.parentElement?.tagName) && n.nodeValue.trim()) n.nodeValue = toCyr(n.nodeValue) } document.querySelectorAll('[placeholder],[title],[aria-label]').forEach(x => { for (const a of ['placeholder', 'title', 'aria-label']) if (x.hasAttribute(a)) x.setAttribute(a, toCyr(x.getAttribute(a))) }) } translateStatic();
         const DEFAULTS = [{ id: 'video', name: 'Видеофонија', description: 'Камери, микрофони и видео опрема', icon: '▣', photo: 'https://tiimg.tistatic.com/fp/4/007/653/15-20-meter-range-water-proof-cctv-camera-for-outdoor-security--985.jpg' }, { id: 'intercom', name: 'Домофонија', description: 'Домофони, влезни единици и спратови', icon: '⌂', photo: 'https://www.2n.com/-/media/Images/Product-Catalogue/Products/modules/2n-helios-ip-verso/ip_verso_main_unit_bluetooth_rfid_reader_black_web_front_560x432.png' }, { id: 'alarm', name: 'Алармни системи', description: 'Сензори, тастатури и сирени', icon: '⌁', photo: 'https://www.electrical2go.co.uk/media/catalog/product/p/r/premier_elite_64-w_live.jpg' }, { id: 'fire', name: 'ПРОТИВПОЖАРНИ СИСТЕМИ', description: 'Пожарни и CO сензори, сирени', icon: '♧', photo: 'https://uzhikvision.uz/uploads/posts/2025-07/s_det_crop_1200x1000_compr.webp' }, { id: 'other', name: 'Мрежа и друго', description: 'Мрежна опрема и други уреди', icon: '⌘', photo: 'https://matchdigi.com/cdn/shop/files/12.jpg?v=1697630947' }];
         function readWorkspace() { let foundCats = null, foundEntries = null; for (const key of [KEYS.cats]) try { const d = JSON.parse(localStorage.getItem(key) || 'null'); if (Array.isArray(d)) foundCats = d } catch { } for (const key of [KEYS.entries, KEYS.oldEntries]) try { const d = JSON.parse(localStorage.getItem(key) || 'null'); if (Array.isArray(d)) foundEntries = d } catch { } for (let i = 0; i < localStorage.length; i++) { try { const d = JSON.parse(localStorage.getItem(localStorage.key(i))); if (Array.isArray(d) && d.length && d[0] && typeof d[0].id === 'string') { if (!foundCats && typeof d[0].name === 'string' && typeof d[0].description === 'string') foundCats = d; if (!foundEntries && typeof d[0].title === 'string' && (typeof d[0].connection === 'string' || typeof d[0].body === 'string')) foundEntries = d } if (d && !Array.isArray(d)) { if (!foundCats && Array.isArray(d.cats)) foundCats = d.cats; if (!foundEntries && Array.isArray(d.entries)) foundEntries = d.entries } } catch { } } const cats = (foundCats && foundCats.length ? foundCats : DEFAULTS).map(c => ({ ...DEFAULTS.find(d => d.id === c.id), ...c, name: c.id === 'fire' ? 'ПРОТИВПОЖАРНИ СИСТЕМИ' : toCyr(c.name || '').toLocaleUpperCase('mk-MK'), description: toCyr(c.description || ''), photo: c.id === 'intercom' && String(c.photo || '').includes('emos_h2014') ? DEFAULTS[1].photo : (c.photo || DEFAULTS.find(d => d.id === c.id)?.photo || '') })); const entries = (foundEntries || []).map((e, i) => ({ ...e, id: e.id || crypto.randomUUID(), model: toCyr(e.model || ''), title: toCyr(e.title || ''), summary: toCyr(e.summary || ''), connection: toCyr(e.connection || e.body || ''), notes: toCyr(e.notes || ''), wiringHeader: e.wiringHeader ? { device: toCyr(e.wiringHeader.device || ''), cable: toCyr(e.wiringHeader.cable || '') } : null, wiring: Array.isArray(e.wiring) ? e.wiring.map(w => ({ from: toCyr(w.from || ''), to: toCyr(w.to || '') })) : [], attachments: Array.isArray(e.attachments) ? e.attachments.map(a => ({ ...a, name: toCyr(a.name || '') })) : [], date: e.date || new Date(Date.now() - i * 1000).toISOString() })); try { localStorage.setItem(KEYS.cats, JSON.stringify(cats)); localStorage.setItem(KEYS.entries, JSON.stringify(entries)) } catch { } return { cats, entries } }
         let { cats, entries } = readWorkspace(), activeFolder = null, query = '', editingId = null, files = [], wires = [], wireHeader = { device: '', cable: '' }, dragCat = null, dragEntry = null, folderPhoto = ''; const catName = id => cats.find(c => c.id === id)?.name || 'Систем'; function save() { try { localStorage.setItem(KEYS.cats, JSON.stringify(cats)); localStorage.setItem(KEYS.entries, JSON.stringify(entries)); $('#save-status').textContent = 'Зачувано'; setTimeout(() => $('#save-status').textContent = '', 1800); return true } catch { $('#save-status').textContent = 'Нема простор'; return false } } function searchNorm(s) { return fromCyr(toCyr(s)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() } function getFiles(e) { return Array.isArray(e.attachments) ? e.attachments : e.image ? [{ name: 'Слика', type: 'image/jpeg', data: e.image }] : [] }
@@ -1241,10 +1258,10 @@
         $('#login-overlay').classList.add('open');
         document.body.classList.remove('firebase-authenticated');
         document.addEventListener('keydown', event => {
-            if (event.key === 'Escape' && (!firebaseUser || !cloudReady)) { event.preventDefault(); event.stopImmediatePropagation(); }
+            if (event.key === 'Escape' && $('#login-overlay').classList.contains('open')) { event.preventDefault(); event.stopImmediatePropagation(); }
         }, true);
         $('#login-overlay').addEventListener('click', event => {
-            if (event.target === event.currentTarget && (!firebaseUser || !cloudReady)) { event.preventDefault(); event.stopImmediatePropagation(); }
+            if (event.target === event.currentTarget && event.currentTarget.classList.contains('open')) { event.preventDefault(); event.stopImmediatePropagation(); }
         }, true);
         let firebaseFolderPhotoChanged = false;
         $('#folder-image').addEventListener('change', () => { firebaseFolderPhotoChanged = true; });
