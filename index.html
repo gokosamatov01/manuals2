@@ -28,6 +28,11 @@
             background: radial-gradient(ellipse at 78% -20%, #25463e 0, transparent 38%), #101722
         }
 
+        body:not(.firebase-authenticated) .shell,
+        body:not(.firebase-authenticated) .backup-dock {
+            display: none !important
+        }
+
         button,
         input,
         textarea,
@@ -1234,6 +1239,13 @@
         const firebaseLoginForm = $('#login-form').cloneNode(true);
         $('#login-form').replaceWith(firebaseLoginForm);
         $('#login-overlay').classList.add('open');
+        document.body.classList.remove('firebase-authenticated');
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && (!firebaseUser || !cloudReady)) { event.preventDefault(); event.stopImmediatePropagation(); }
+        }, true);
+        $('#login-overlay').addEventListener('click', event => {
+            if (event.target === event.currentTarget && (!firebaseUser || !cloudReady)) { event.preventDefault(); event.stopImmediatePropagation(); }
+        }, true);
         let firebaseFolderPhotoChanged = false;
         $('#folder-image').addEventListener('change', () => { firebaseFolderPhotoChanged = true; });
         $('#add-folder').addEventListener('click', () => { firebaseFolderPhotoChanged = false; });
@@ -1349,17 +1361,20 @@
                         }
                     }
                     $('#login-overlay').classList.remove('open');
+                    document.body.classList.add('firebase-authenticated');
                     showFirebaseLoginMessage('Најави се со Firebase сметката или креирај нова.');
                     $('#save-status').textContent = 'Firebase синхронизирано';
                     setTimeout(() => { if ($('#save-status').textContent === 'Firebase синхронизирано') $('#save-status').textContent = ''; }, 2200);
                 } catch (error) {
                     cloudReady = false;
+                    document.body.classList.remove('firebase-authenticated');
                     showFirebaseLoginMessage('Синхронизацијата не успеа. Провери ги Firestore правилата.');
                     $('#login-overlay').classList.add('open');
                     console.error('Firebase workspace load failed:', error);
                 }
             }, error => {
                 cloudReady = false;
+                document.body.classList.remove('firebase-authenticated');
                 showFirebaseLoginMessage('Firebase не е подготвен. Провери ги Firestore правилата.');
                 $('#login-overlay').classList.add('open');
                 console.error('Firebase workspace listener failed:', error);
@@ -1382,6 +1397,7 @@
                 if (unsubscribeWorkspace) unsubscribeWorkspace();
                 unsubscribeWorkspace = null;
                 cloudReady = false;
+                document.body.classList.remove('firebase-authenticated');
                 $('#login-user').classList.add('hidden');
                 $('#logout').classList.add('hidden');
                 $('#login-overlay').classList.add('open');
@@ -1393,7 +1409,16 @@
             $('#save-status').textContent = 'Се вчитуваат податоците...';
             listenToFirebaseWorkspace(user);
         });
-        $('#logout').onclick = () => auth.signOut();
+        $('#logout').onclick = async () => {
+            document.body.classList.remove('firebase-authenticated');
+            cloudReady = false;
+            $('#login-user').classList.add('hidden');
+            $('#logout').classList.add('hidden');
+            $('#login-overlay').classList.add('open');
+            showFirebaseLoginMessage('Одјавен си. Најави се повторно за да ги отвориш податоците.');
+            try { await auth.signOut(); }
+            catch (error) { showFirebaseLoginMessage(error.message); }
+        };
         window.save = function () {
             try {
                 if (firebaseFolderPhotoChanged) {
