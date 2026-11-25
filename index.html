@@ -80,6 +80,15 @@
             gap: 0
         }
 
+        .brand-summary {
+            margin-top: 5px;
+            color: #8292a7;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: .1px;
+            line-height: 1.35
+        }
+
         .brand-name {
             white-space: nowrap;
             color: var(--accent);
@@ -136,6 +145,31 @@
             gap: 2px;
             min-width: 0
         }
+
+        .db-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #98a6b5;
+            font-size: 9px;
+            line-height: 1.3
+        }
+
+        .db-status::before {
+            width: 6px;
+            height: 6px;
+            flex: 0 0 6px;
+            border-radius: 50%;
+            background: #8793a1;
+            content: "";
+        }
+
+        .db-status[data-state="connected"] { color: #91c8a6 }
+        .db-status[data-state="connected"]::before { background: #59c982; box-shadow: 0 0 7px #59c98266 }
+        .db-status[data-state="checking"] { color: #c8b47b }
+        .db-status[data-state="checking"]::before { background: #d4b65d }
+        .db-status[data-state="error"] { color: #d9958e }
+        .db-status[data-state="error"]::before { background: #dc7067 }
 
         .account-label {
             color: #8292a7;
@@ -1078,7 +1112,7 @@
         <header class="topbar">
             <button class="brand brand-home" id="brand-home" type="button" aria-label="Почетна страница">
                 <img class="mark" src="assets/logo.jfif" alt="Архива за поврзување">
-                <span class="brand-copy"><strong class="brand-name" data-cyr>АРХИВА ЗА ПОВРЗУВАЊЕ</strong></span>
+                <span class="brand-copy"><strong class="brand-name" data-cyr>АРХИВА ЗА ПОВРЗУВАЊЕ</strong><span class="brand-summary" id="brand-summary" data-cyr></span></span>
             </button>
             <div class="top-actions">
                 <span class="save-status" id="save-status"></span>
@@ -1086,6 +1120,7 @@
                     <div class="account-meta">
                         <span class="account-label" data-cyr>АДМИНИСТРАТОРСКИ ПАНЕЛ</span>
                         <strong class="account-welcome" data-cyr>Добредојдовте, Ѓоко</strong>
+                        <span class="db-status" id="db-status" data-state="checking" data-cyr>Се поврзува со базата...</span>
                         <span class="login-user hidden" id="login-user"></span>
                     </div>
                     <button class="logout hidden" id="logout" type="button" data-cyr>Одјави се</button>
@@ -1223,6 +1258,26 @@
         const auth = firebase.auth(), firestore = firebase.firestore();
         const clientId = crypto.randomUUID();
         let firebaseUser = null, cloudReady = false, unsubscribeWorkspace = null, cloudWriteQueue = Promise.resolve();
+        const AUTH_EXPIRY_KEY = 'manuals-auth-expiry-v1', AUTH_DURATION_MS = 20 * 60 * 1000;
+        let authExpiryTimer = null;
+        function startAuthExpiry(user) {
+            let expiresAt = Number(localStorage.getItem(AUTH_EXPIRY_KEY));
+            if (!Number.isFinite(expiresAt) || expiresAt <= 0) {
+                expiresAt = Date.now() + AUTH_DURATION_MS;
+                localStorage.setItem(AUTH_EXPIRY_KEY, String(expiresAt));
+            }
+            const remaining = expiresAt - Date.now();
+            if (remaining <= 0) {
+                localStorage.removeItem(AUTH_EXPIRY_KEY);
+                auth.signOut();
+                return false;
+            }
+            clearTimeout(authExpiryTimer);
+            authExpiryTimer = setTimeout(() => {
+                if (auth.currentUser?.uid === user.uid) auth.signOut();
+            }, remaining);
+            return true;
+        }
         const KEYS = { entries: 'moite-tehnicki-beleski-v2', oldEntries: 'moite-tehnicki-beleski-v1', cats: 'moite-tehnicki-folders-v1', backup: 'potsetnik-last-backup-v1' };
         const protect = new Set('gnd ftp citac com no nc tamper alarm eol in out go plus minus ah hybrid star paradox cctv co usb lan rj45 ip mac snmp pdf wifi poe gjoko'.split(' '));
         function toCyr(v = '') { v = String(v).replace(/\bzolta\b/gi, 'жолта').replace(/\bzicaite\b/gi, 'жиците').replace(/\bzicite\b/gi, 'жиците').replace(/\bzici\b/gi, 'жици').replace(/\bzica\b/gi, 'жица').replace(/\bcitac\b/gi, 'читач'); return String(v).replace(/[A-Za-z0-9]+/g, t => { if (/[0-9]/.test(t) || protect.has(t.toLowerCase()) || /^[A-Z]+$/.test(t)) return t; const x = t.toLowerCase(), pairs = [['sht', 'шт'], ['dzh', 'џ'], ['zh', 'ж'], ['ch', 'ч'], ['sh', 'ш'], ['lj', 'љ'], ['nj', 'њ'], ['gj', 'ѓ'], ['kj', 'ќ'], ['dj', 'ђ'], ['dz', 'ѕ']], one = { a: 'а', b: 'б', v: 'в', g: 'г', d: 'д', e: 'е', z: 'з', i: 'и', j: 'ј', k: 'к', l: 'л', m: 'м', n: 'н', o: 'о', p: 'п', r: 'р', s: 'с', t: 'т', u: 'у', f: 'ф', h: 'х', c: 'ц' }; let out = ''; for (let i = 0; i < x.length;) { const p = pairs.find(y => x.startsWith(y[0], i)); if (p) { out += p[1]; i += p[0].length } else { out += one[x[i]] || x[i]; i++ } } return t[0] === t[0].toUpperCase() ? out[0].toUpperCase() + out.slice(1) : out }) }
@@ -1232,7 +1287,7 @@
         const DEFAULTS = [{ id: 'video', name: 'Видеофонија', description: 'Камери, микрофони и видео опрема', icon: '▣', photo: 'https://tiimg.tistatic.com/fp/4/007/653/15-20-meter-range-water-proof-cctv-camera-for-outdoor-security--985.jpg' }, { id: 'intercom', name: 'Домофонија', description: 'Домофони, влезни единици и спратови', icon: '⌂', photo: 'https://www.2n.com/-/media/Images/Product-Catalogue/Products/modules/2n-helios-ip-verso/ip_verso_main_unit_bluetooth_rfid_reader_black_web_front_560x432.png' }, { id: 'alarm', name: 'Алармни системи', description: 'Сензори, тастатури и сирени', icon: '⌁', photo: 'https://www.electrical2go.co.uk/media/catalog/product/p/r/premier_elite_64-w_live.jpg' }, { id: 'fire', name: 'ПРОТИВПОЖАРНИ СИСТЕМИ', description: 'Пожарни и CO сензори, сирени', icon: '♧', photo: 'https://uzhikvision.uz/uploads/posts/2025-07/s_det_crop_1200x1000_compr.webp' }, { id: 'other', name: 'Мрежа и друго', description: 'Мрежна опрема и други уреди', icon: '⌘', photo: 'https://matchdigi.com/cdn/shop/files/12.jpg?v=1697630947' }];
         function readWorkspace() { let foundCats = null, foundEntries = null; for (const key of [KEYS.cats]) try { const d = JSON.parse(localStorage.getItem(key) || 'null'); if (Array.isArray(d)) foundCats = d } catch { } for (const key of [KEYS.entries, KEYS.oldEntries]) try { const d = JSON.parse(localStorage.getItem(key) || 'null'); if (Array.isArray(d)) foundEntries = d } catch { } for (let i = 0; i < localStorage.length; i++) { try { const d = JSON.parse(localStorage.getItem(localStorage.key(i))); if (Array.isArray(d) && d.length && d[0] && typeof d[0].id === 'string') { if (!foundCats && typeof d[0].name === 'string' && typeof d[0].description === 'string') foundCats = d; if (!foundEntries && typeof d[0].title === 'string' && (typeof d[0].connection === 'string' || typeof d[0].body === 'string')) foundEntries = d } if (d && !Array.isArray(d)) { if (!foundCats && Array.isArray(d.cats)) foundCats = d.cats; if (!foundEntries && Array.isArray(d.entries)) foundEntries = d.entries } } catch { } } const cats = (foundCats && foundCats.length ? foundCats : DEFAULTS).map(c => ({ ...DEFAULTS.find(d => d.id === c.id), ...c, name: c.id === 'fire' ? 'ПРОТИВПОЖАРНИ СИСТЕМИ' : toCyr(c.name || '').toLocaleUpperCase('mk-MK'), description: toCyr(c.description || ''), photo: c.id === 'intercom' && String(c.photo || '').includes('emos_h2014') ? DEFAULTS[1].photo : (c.photo || DEFAULTS.find(d => d.id === c.id)?.photo || '') })); const entries = (foundEntries || []).map((e, i) => ({ ...e, id: e.id || crypto.randomUUID(), model: toCyr(e.model || ''), title: toCyr(e.title || ''), summary: toCyr(e.summary || ''), connection: toCyr(e.connection || e.body || ''), notes: toCyr(e.notes || ''), wiringHeader: e.wiringHeader ? { device: toCyr(e.wiringHeader.device || ''), cable: toCyr(e.wiringHeader.cable || '') } : null, wiring: Array.isArray(e.wiring) ? e.wiring.map(w => ({ from: toCyr(w.from || ''), to: toCyr(w.to || '') })) : [], attachments: Array.isArray(e.attachments) ? e.attachments.map(a => ({ ...a, name: toCyr(a.name || '') })) : [], date: e.date || new Date(Date.now() - i * 1000).toISOString() })); try { localStorage.setItem(KEYS.cats, JSON.stringify(cats)); localStorage.setItem(KEYS.entries, JSON.stringify(entries)) } catch { } return { cats, entries } }
         let { cats, entries } = readWorkspace(), activeFolder = null, query = '', editingId = null, files = [], wires = [], wireHeader = { device: '', cable: '' }, dragCat = null, dragEntry = null, folderPhoto = ''; const catName = id => cats.find(c => c.id === id)?.name || 'Систем'; function save() { try { localStorage.setItem(KEYS.cats, JSON.stringify(cats)); localStorage.setItem(KEYS.entries, JSON.stringify(entries)); $('#save-status').textContent = 'Зачувано'; setTimeout(() => $('#save-status').textContent = '', 1800); return true } catch { $('#save-status').textContent = 'Нема простор'; return false } } function searchNorm(s) { return fromCyr(toCyr(s)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() } function getFiles(e) { return Array.isArray(e.attachments) ? e.attachments : e.image ? [{ name: 'Слика', type: 'image/jpeg', data: e.image }] : [] }
-        function render() { const q = searchNorm(query), matches = entries.filter(e => (!activeFolder || e.category === activeFolder) && (!q || searchNorm([e.title, e.model, e.summary, e.connection, e.notes, catName(e.category), ...(e.wiring || []).flatMap(w => [w.from, w.to])].join(' ')).includes(q))); $('#folders').classList.toggle('hidden', !!activeFolder || !!query); $('#entries-section').classList.toggle('hidden', !activeFolder && !query); $('#add-folder').classList.toggle('hidden', !!activeFolder || !!query); $('#back').classList.toggle('hidden', !activeFolder); $('#list-title').textContent = activeFolder ? catName(activeFolder) : 'Резултати од пребарување'; $('#list-subtitle').textContent = activeFolder ? `${matches.length} ${matches.length === 1 ? 'запис' : 'записи'} во папката` : query ? `${matches.length} пронајдени записи` : ''; $('#folders').innerHTML = cats.map(c => `<article class="folder" data-folder="${esc(c.id)}"><img class="folder-photo" src="${esc(c.photo || '')}" alt="" onerror="this.style.opacity='.2'"><div class="folder-info"><div class="folder-name">${esc(toCyr(c.name))}</div><div class="folder-desc">${esc(toCyr(c.description || ''))}</div><div class="folder-count">${entries.filter(e => e.category === c.id).length} записи</div></div><div class="folder-tools"><button class="tiny-tool folder-reorder" type="button" draggable="true" data-drag-cat="${esc(c.id)}" title="Повлечи за редослед">⠿</button><button class="tiny-tool folder-edit" type="button" data-edit-cat="${esc(c.id)}" title="Уреди папка">✎</button></div></article>`).join(''); $('#entries').innerHTML = !activeFolder && !query ? '' : matches.length ? matches.map(e => `<article class="entry" data-entry="${esc(e.id)}"><div class="entry-top"><span class="pill">${esc(catName(e.category))}</span><time>${new Intl.DateTimeFormat('mk-MK', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(e.date))}</time>${activeFolder && !query ? `<button class="entry-order" draggable="true" data-drag-entry="${esc(e.id)}" type="button" title="Повлечи за редослед">⠿</button>` : ''}</div><h3>${esc(toCyr(e.title))}</h3><div class="model">${e.model ? `<span class="model-card"><span class="model-label">МОДЕЛ</span><strong class="model-value">${esc(toCyr(e.model))}</strong></span>` : ''}${getFiles(e).length ? `<span class="attachment-note">Има прилог</span>` : ''}</div>${e.summary ? `<p class="entry-desc">${esc(toCyr(e.summary))}</p>` : ''}</article>`).join('') : `<div class="empty"><strong>${query ? 'Нема пронајдени записи' : 'Нема записи'}</strong>${query ? 'Пробај со друг збор или модел.' : 'Додај запис со чекори за поврзување.'}</div>`; $('#category').innerHTML = cats.map(c => `<option value="${esc(c.id)}">${esc(catName(c.id))}</option>`).join(''); renderSuggestions() }
+        function render() { const q = searchNorm(query), matches = entries.filter(e => (!activeFolder || e.category === activeFolder) && (!q || searchNorm([e.title, e.model, e.summary, e.connection, e.notes, catName(e.category), ...(e.wiring || []).flatMap(w => [w.from, w.to])].join(' ')).includes(q))); $('#brand-summary').textContent = `Технички шеми и конфигурации · ${entries.length} ${entries.length === 1 ? 'запис' : 'записи'}`; $('#folders').classList.toggle('hidden', !!activeFolder || !!query); $('#entries-section').classList.toggle('hidden', !activeFolder && !query); $('#add-folder').classList.toggle('hidden', !!activeFolder || !!query); $('#back').classList.toggle('hidden', !activeFolder); $('#list-title').textContent = activeFolder ? catName(activeFolder) : 'Резултати од пребарување'; $('#list-subtitle').textContent = activeFolder ? `${matches.length} ${matches.length === 1 ? 'запис' : 'записи'} во папката` : query ? `${matches.length} пронајдени записи` : ''; $('#folders').innerHTML = cats.map(c => `<article class="folder" data-folder="${esc(c.id)}"><img class="folder-photo" src="${esc(c.photo || '')}" alt="" onerror="this.style.opacity='.2'"><div class="folder-info"><div class="folder-name">${esc(toCyr(c.name))}</div><div class="folder-desc">${esc(toCyr(c.description || ''))}</div><div class="folder-count">${entries.filter(e => e.category === c.id).length} записи</div></div><div class="folder-tools"><button class="tiny-tool folder-reorder" type="button" draggable="true" data-drag-cat="${esc(c.id)}" title="Повлечи за редослед">⠿</button><button class="tiny-tool folder-edit" type="button" data-edit-cat="${esc(c.id)}" title="Уреди папка">✎</button></div></article>`).join(''); $('#entries').innerHTML = !activeFolder && !query ? '' : matches.length ? matches.map(e => `<article class="entry" data-entry="${esc(e.id)}"><div class="entry-top"><span class="pill">${esc(catName(e.category))}</span><time>${new Intl.DateTimeFormat('mk-MK', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(e.date))}</time>${activeFolder && !query ? `<button class="entry-order" draggable="true" data-drag-entry="${esc(e.id)}" type="button" title="Повлечи за редослед">⠿</button>` : ''}</div><h3>${esc(toCyr(e.title))}</h3><div class="model">${e.model ? `<span class="model-card"><span class="model-label">МОДЕЛ</span><strong class="model-value">${esc(toCyr(e.model))}</strong></span>` : ''}${getFiles(e).length ? `<span class="attachment-note">Има прилог</span>` : ''}</div>${e.summary ? `<p class="entry-desc">${esc(toCyr(e.summary))}</p>` : ''}</article>`).join('') : `<div class="empty"><strong>${query ? 'Нема пронајдени записи' : 'Нема записи'}</strong>${query ? 'Пробај со друг збор или модел.' : 'Додај запис со чекори за поврзување.'}</div>`; $('#category').innerHTML = cats.map(c => `<option value="${esc(c.id)}">${esc(catName(c.id))}</option>`).join(''); renderSuggestions() }
         function renderSuggestions() { const box = $('#suggestions'), q = searchNorm($('#search').value.trim()); if (!q) { box.classList.add('hidden'); box.innerHTML = ''; return } const hits = entries.filter(e => searchNorm([e.title, e.model, e.summary, e.connection, e.notes, catName(e.category), ...(e.wiring || []).flatMap(w => [w.from, w.to])].join(' ')).includes(q)).slice(0, 7); box.classList.remove('hidden'); box.innerHTML = hits.length ? hits.map(e => `<button class="suggestion" type="button" data-suggest="${esc(e.id)}">⌕ <span>${esc(toCyr(e.title))}<small>${esc(catName(e.category))} · ${esc(toCyr(e.model))}</small></span></button>`).join('') : `<div class="suggestion">Нема пронајдени записи</div>` }
         function drawWires() { $('#wire-device').value = wireHeader.device || ''; $('#wire-cable').value = wireHeader.cable || ''; $('#wire-grid').innerHTML = wires.map((w, i) => `<div class="wire-row"><span class="num">${i + 1}</span><input data-wire="${i}" data-side="from" value="${esc(w.from)}" placeholder="Клема / жица"><span class="arrow">→</span><input data-wire="${i}" data-side="to" value="${esc(w.to)}" placeholder="Боја / кабел"><button class="wire-remove" type="button" data-remove-wire="${i}">×</button></div>`).join('') }
         function openForm(e = null) { editingId = e?.id || null; $('#entry-form').reset(); const categoryField = $('#category').closest('.field'); categoryField.classList.toggle('hidden', !e && !!activeFolder); $('#category').value = e?.category || activeFolder || cats[0]?.id || ''; $('#form-title').textContent = e ? 'Измени запис' : 'Нов запис за модел'; for (const f of ['model', 'title', 'summary', 'connection', 'notes']) $('#' + f).value = e?.[f] || ''; wireHeader = e?.wiringHeader ? { ...e.wiringHeader } : { device: '', cable: '' }; wires = e?.wiring ? e.wiring.map(w => ({ ...w })) : []; files = e ? getFiles(e).map(a => ({ ...a })) : []; $('#attachment-list').innerHTML = files.map((a, i) => `<div>${esc(a.name)} <button type="button" data-del-file="${i}">×</button></div>`).join(''); drawWires(); $('#form-overlay').classList.add('open') }
@@ -1271,6 +1326,11 @@
         document.querySelectorAll('[data-close="folder"]').forEach(button => button.addEventListener('click', () => { firebaseFolderPhotoChanged = false; }));
         document.addEventListener('keydown', event => { if (event.key === 'Escape') firebaseFolderPhotoChanged = false; });
         function showFirebaseLoginMessage(message) { $('#login-message').textContent = message; }
+        function setDatabaseStatus(state, message) {
+            const indicator = $('#db-status');
+            indicator.dataset.state = state;
+            indicator.textContent = message;
+        }
         function saveLocalWorkspace() {
             try { localStorage.setItem(KEYS.cats, JSON.stringify(cats)); localStorage.setItem(KEYS.entries, JSON.stringify(entries)); }
             catch (error) { console.warn('Local copy could not be saved:', error); }
@@ -1348,12 +1408,14 @@
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             $('#save-status').textContent = 'Синхронизирано';
+            setDatabaseStatus('connected', 'Поврзано со базата');
             setTimeout(() => { if ($('#save-status').textContent === 'Синхронизирано') $('#save-status').textContent = ''; }, 2200);
         }
         function queueFirebaseSave() {
             if (!firebaseUser || !cloudReady) return;
             cloudWriteQueue = cloudWriteQueue.then(writeFirebaseWorkspace, writeFirebaseWorkspace).catch(error => {
                 $('#save-status').textContent = 'Грешка при синхронизација';
+                setDatabaseStatus('error', 'Грешка со базата');
                 console.error('Firebase sync failed:', error);
             });
         }
@@ -1379,12 +1441,14 @@
                     }
                     $('#login-overlay').classList.remove('open');
                     document.body.classList.add('firebase-authenticated');
+                    setDatabaseStatus('connected', 'Поврзано со базата');
                     showFirebaseLoginMessage('Најави се со Firebase сметката или креирај нова.');
                     $('#save-status').textContent = 'Firebase синхронизирано';
                     setTimeout(() => { if ($('#save-status').textContent === 'Firebase синхронизирано') $('#save-status').textContent = ''; }, 2200);
                 } catch (error) {
                     cloudReady = false;
                     document.body.classList.remove('firebase-authenticated');
+                    setDatabaseStatus('error', 'Грешка со базата');
                     showFirebaseLoginMessage('Синхронизацијата не успеа. Провери ги Firestore правилата.');
                     $('#login-overlay').classList.add('open');
                     console.error('Firebase workspace load failed:', error);
@@ -1392,11 +1456,22 @@
             }, error => {
                 cloudReady = false;
                 document.body.classList.remove('firebase-authenticated');
+                setDatabaseStatus('error', 'Базата не е достапна');
                 showFirebaseLoginMessage('Firebase не е подготвен. Провери ги Firestore правилата.');
                 $('#login-overlay').classList.add('open');
                 console.error('Firebase workspace listener failed:', error);
             });
         }
+        window.addEventListener('offline', () => {
+            if (!firebaseUser) return;
+            cloudReady = false;
+            setDatabaseStatus('error', 'Нема интернет-врска');
+        });
+        window.addEventListener('online', () => {
+            if (!firebaseUser) return;
+            cloudReady = false;
+            setDatabaseStatus('checking', 'Се проверува врската...');
+        });
         firebaseLoginForm.addEventListener('submit', async event => {
             event.preventDefault();
             showFirebaseLoginMessage('Се најавувам...');
@@ -1411,24 +1486,32 @@
         auth.onAuthStateChanged(user => {
             firebaseUser = user;
             if (!user) {
+                clearTimeout(authExpiryTimer);
+                authExpiryTimer = null;
+                localStorage.removeItem(AUTH_EXPIRY_KEY);
                 if (unsubscribeWorkspace) unsubscribeWorkspace();
                 unsubscribeWorkspace = null;
                 cloudReady = false;
+                setDatabaseStatus('checking', 'Најави се за поврзување');
                 document.body.classList.remove('firebase-authenticated');
                 $('#login-user').classList.add('hidden');
                 $('#logout').classList.add('hidden');
                 $('#login-overlay').classList.add('open');
                 return;
             }
+            if (!startAuthExpiry(user)) return;
             $('#login-user').textContent = user.email || 'Најавен корисник';
+            setDatabaseStatus('checking', 'Се поврзува со базата...');
             $('#login-user').classList.remove('hidden');
             $('#logout').classList.remove('hidden');
             $('#save-status').textContent = 'Се вчитуваат податоците...';
             listenToFirebaseWorkspace(user);
         });
         $('#logout').onclick = async () => {
+            localStorage.removeItem(AUTH_EXPIRY_KEY);
             document.body.classList.remove('firebase-authenticated');
             cloudReady = false;
+            setDatabaseStatus('checking', 'Најави се за поврзување');
             $('#login-user').classList.add('hidden');
             $('#logout').classList.add('hidden');
             $('#login-overlay').classList.add('open');
